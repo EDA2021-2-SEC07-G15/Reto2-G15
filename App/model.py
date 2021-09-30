@@ -38,9 +38,29 @@ los mismos.
 """
 
 # Construccion de modelos
+def newCatalog():
+    catalogo = {'artist': None,
+               'artworks': None,
+               'Artw_Nacionalidades': None,
+               "medium": None,}
+
+    catalogo['artist'] = lt.newList(datastructure= "ARRAY_LIST")
+    catalogo['artworks'] = lt.newList(datastructure= "ARRAY_LIST")
+    catalogo["Artw_Nacionalidades"] = lt.newList(datastructure= "ARRAY_LIST")
+    catalogo["medium"] = mp.newMap(1000,maptype="CHAINING",loadfactor=4.0)
+
+
+    return catalogo
 
 # Funciones para agregar informacion al catalogo
+def addArtists(catalog, artist):
+    lt.addLast(catalog['artist'], artist) 
 
+def addArtworks(catalog, artwork):
+    lt.addLast(catalog['artworks'], artwork)
+    mp.put(catalog["medium"], artwork["Medium"], artwork )
+def addArtw_Nt(Lista,catalog):
+    lt.addLast(Lista["Artw_Nacionalidades"],catalog)
 # Funciones para creacion de datos
 
 # Funciones de consulta

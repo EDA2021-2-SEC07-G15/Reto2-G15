@@ -48,10 +48,14 @@ while True:
     printMenu()
     inputs = input('Seleccione una opción para continuar\n')
     if int(inputs[0]) == 1:
-        print("Cargando información de los archivos ....")
+        print("Inicializando catálogo ....")
+        cont = controller.initCatalog()
 
     elif int(inputs[0]) == 2:
-        pass
+        print("Cargando información de los archivos ....")
+        controller.loadData(cont,'Artists-utf8-small.csv','Artworks-utf8-small.csv')
+        print("Se cargo exitosamente la información")
+        
 
     else:
         sys.exit(0)
