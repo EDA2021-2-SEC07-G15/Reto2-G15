@@ -36,9 +36,10 @@ def initCatalog():
 
 # Funciones para la carga de datos
 def loadData(catalog,artists,artworks):
-
-    loadArtists(catalog,artists)
+    
     loadArtworks(catalog,artworks)
+    loadArtists(catalog,artists)
+    
 
 def loadArtists(catalog,filename):
     """

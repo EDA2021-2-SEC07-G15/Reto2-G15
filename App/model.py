@@ -42,12 +42,14 @@ def newCatalog():
     catalogo = {'artist': None,
                'artworks': None,
                'Artw_Nacionalidades': None,
-               "medium": None,}
+               "medium": None,
+               "nationality":None}
 
     catalogo['artist'] = lt.newList(datastructure= "ARRAY_LIST")
     catalogo['artworks'] = lt.newList(datastructure= "ARRAY_LIST")
     catalogo["Artw_Nacionalidades"] = lt.newList(datastructure= "ARRAY_LIST")
     catalogo["medium"] = mp.newMap(1000,maptype="CHAINING",loadfactor=4.0)
+    catalogo["nationality"] = mp.newMap(1000,maptype="CHAINING",loadfactor=4.0)
 
 
     return catalogo
@@ -55,12 +57,30 @@ def newCatalog():
 # Funciones para agregar informacion al catalogo
 def addArtists(catalog, artist):
     lt.addLast(catalog['artist'], artist) 
+    Id = artist["ConstituentID"]
+    nacionalidad = artist["Nationality"]
+    addArtistbyNat(catalog,Id,artist,nacionalidad)
+
+
 
 def addArtworks(catalog, artwork):
     lt.addLast(catalog['artworks'], artwork)
     mp.put(catalog["medium"], artwork["Medium"], artwork )
 def addArtw_Nt(Lista,catalog):
     lt.addLast(Lista["Artw_Nacionalidades"],catalog)
+def addArtistbyNat(catalog,id,information,nacionality):
+    nacionalidades = catalog["nationality"]
+    artworks = catalog["artworks"]
+    i = 1 
+    listaObras = lt.newList(datastructure="ARRAY_LIST")
+    while i < lt.size(artworks):
+        artworkAcomparar = lt.getElement(artworks,i)
+        constituentId = artworkAcomparar["ConstituentID"]
+        if id == constituentId:
+            lt.addLast(listaObras,artworkAcomparar)
+        i+=1
+
+    pass
 # Funciones para creacion de datos
 
 # Funciones de consulta
