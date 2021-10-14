@@ -36,7 +36,7 @@ def initCatalog():
 
 # Funciones para la carga de datos
 def loadData(catalog,artists,artworks):
-    
+
     loadArtworks(catalog,artworks)
     loadArtists(catalog,artists)
     
@@ -58,9 +58,21 @@ def loadArtworks(catalog,filename):
     lectura = csv.DictReader(open(artworksfile, encoding="utf-8"))
     for artwork in lectura:
         model.addArtworks(catalog, artwork)
-def LoadArtNat (catalogo,lista):
-    model.addArtw_Nt(lista,catalogo)
+    
 
 # Funciones de ordenamiento
 
 # Funciones de consulta sobre el catálogo
+def artistsize(catalog):
+
+    return model.ArtistSize(catalog)
+def artworkssize(catalog):
+
+    return model.ArtworksSize(catalog)
+def getartistsByrange(catalogo,fechaInicial, fechaFinal):
+
+    return model.getartistsByrange(catalogo,fechaInicial,fechaFinal)
+def getNumberNat(cont,nacionalidad):
+    
+    return model.getNumberNat(cont,nacionalidad)
+
