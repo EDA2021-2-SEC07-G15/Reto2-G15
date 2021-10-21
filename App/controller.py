@@ -61,6 +61,12 @@ def loadArtworks(catalog,filename):
     
 
 # Funciones de ordenamiento
+def sortArtistByDate(catalog, ):
+    return model.sortArtistbyDate(catalog)
+def sortDate(total):
+    return model.sortDate(total)
+def sortArtVsNatBynum(Catalogo_Art_Nacionalidad):
+    return model.sortArtVsNatBynum(Catalogo_Art_Nacionalidad)
 
 # Funciones de consulta sobre el catálogo
 def artistsize(catalog):
@@ -75,4 +81,10 @@ def getartistsByrange(catalogo,fechaInicial, fechaFinal):
 def getNumberNat(cont,nacionalidad):
     
     return model.getNumberNat(cont,nacionalidad)
+def Artorksinrange(catalog,date1,date2):
+    return model.Artorksinrange(catalog,date1,date2)
+def searchConstituentID (Lista_artista,idAw):
+    return model.searchConstituentID (Lista_artista,idAw)
+def NumArtByNat(catalog):
+    return model.NumArtByNat(catalog)
 
