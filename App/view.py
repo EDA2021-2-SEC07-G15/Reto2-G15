@@ -79,8 +79,8 @@ def PrintResults4(lista,mapa,lista_artistas):
     pais = Mejor_pais["Nacionalidad"]
     pareja = mp.get(mapa,pais)
     lista2= me.getValue(pareja)
-    print("La mejor naciolanidad en el museo es: " + str(pais) + " con " + str(lt.size(lista2)) + " piezas unicas" )
-    print("Las primeras y ultimas 3 obras in la lista de obas amercianas son: ")
+    print("La mejor nacionalidad en el museo es: " + str(pais) + " con " + str(lt.size(lista2)) + " piezas unicas" )
+    print("Las primeras y ultimas 3 obras en la lista de obras de " + str(pais) + " son: ")
     #Primeros 3 
     d = 1
     while d < 4:
@@ -97,6 +97,53 @@ def PrintResults4(lista,mapa,lista_artistas):
         nombreU = controller.searchConstituentID(lista_artistas,C_idu)
         print("Titulo: " + ultimos["Title"] + "; Nombre: " + nombreU + "; Fecha: " + ultimos["Date"] + "; Medio: " + ultimos["Medium"] + "; Dimensiones: " + ultimos["Dimensions"])
         j -=1
+def printResults6(mapa,departamento,costo_total,lista_costos,lista_olds,peso,lista_artistas):
+    pareja = mp.get(mapa,departamento)
+    valor = me.getValue(pareja)
+    tamaño = lt.size(valor)
+    print("--------------------------------------------------------------------------------")
+    print("El MoMA transportará " + str(tamaño) + " artefactos de " + str(departamento) )
+    print("Peso estimado de carga (kg): " + str(peso))
+    print("Costo estimado en carga (USD): " + str(costo_total) + " USD")
+    print("------------El top 5 items más caros transportados son: ----------------")
+    #Primeros 5 mas caros
+    d = 1
+    while d <= 5:
+        primeros = lt.getElement (lista_costos,d)
+        C_id = primeros["ConstituentID"]
+        nombre = controller.searchConstituentID(lista_artistas,C_id)
+        print("----------------------------------------------------------")
+        print("Titulo: " + primeros["Title"])
+        print("Nombre: " + str(nombre))
+        print("Clasificación: " + str(primeros["Classification"]))
+        print("Fecha: " + str(primeros["Date"]))
+        print("Medio: " + primeros["Medium"])
+        print("Dimensiones: " + primeros["Dimensions"])
+        print("Costo transporte: " + str(primeros["CostoTransporte (USD)"]))
+        print("-----------------------------------------------------------")        
+        d+=1
+    #Más viejos 
+    print("----------El top 5 items mas antiguos son:     -----------------------")
+    rango = 5
+    i = 1
+    while i <= rango:
+        antiguos = lt.getElement (lista_olds,i)
+        if antiguos["Date"] != "":
+            C_id = antiguos["ConstituentID"]
+            nombre = controller.searchConstituentID(lista_artistas,C_id)
+            print("-------------------------------------------------------------")
+            print("Titulo: " + antiguos["Title"])
+            print("Nombre: " + str(nombre))
+            print("Clasificación: " + str(antiguos["Classification"]))
+            print("Fecha: " + str(antiguos["Date"]))
+            print("Medio: " + str(antiguos["Medium"]))
+            print("Dimensiones: " + str(antiguos["Dimensions"]))
+            print("Costo transporte: " + str(antiguos["CostoTransporte (USD)"]))
+            print("----------------------------------------------------------------")
+            i +=1
+        else:
+            rango += 1
+            i+=1
 
 """
 La vista se encarga de la interacción con el usuario
@@ -110,6 +157,7 @@ def printMenu():
     print("1- Cargar información en el catálogo")
     print("2- Requerimiento 1")
     print("3- Requerimiento 2")
+    print("4- Requerimiento 3")
     print("5- Requerimiento 4")
     print("6- Requerimiento 5")
 
@@ -125,7 +173,7 @@ while True:
         print("Inicializando catálogo ....")
         cont = controller.initCatalog()
         print("Cargando información de los archivos ....")
-        controller.loadData(cont,'Artists-utf8-small.csv','Artworks-utf8-small.csv')
+        controller.loadData(cont,'Artists-utf8-large.csv','Artworks-utf8-large.csv')
         print("Se cargo exitosamente la información")
         print("Artistas cargados: " + str(controller.artistsize(cont)))
         print("Artworks cargados: " + str(controller.artworkssize(cont)))
@@ -152,8 +200,12 @@ while True:
         mapa = cont["nationality"]
         PrintResults4(ordenada,mapa,cont["artist"])
     elif int(inputs[0])== 6:
-        pass
-
+        departamento = input("Ingrese el departamento que desea consultar: ")
+        mapa = cont["departamento"]
+        Lista_costos = controller.Calcular_Costo_dep (departamento,mapa)
+        ordenada_fechas = controller.sortDepabydate(Lista_costos[0])
+        ordenada_costos = controller.sortDepbyprice(Lista_costos[0])
+        printResults6(mapa,departamento,Lista_costos[1],ordenada_costos,ordenada_fechas,Lista_costos[2],cont["artist"])
     else:
         sys.exit(0)
 sys.exit(0)

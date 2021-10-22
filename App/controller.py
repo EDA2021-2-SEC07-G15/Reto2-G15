@@ -23,6 +23,8 @@
 import config as cf
 import model
 import csv
+from DISClib.ADT import map as mp
+from DISClib.DataStructures import mapentry as me
 
 
 """
@@ -67,6 +69,10 @@ def sortDate(total):
     return model.sortDate(total)
 def sortArtVsNatBynum(Catalogo_Art_Nacionalidad):
     return model.sortArtVsNatBynum(Catalogo_Art_Nacionalidad)
+def sortDepabydate(lista_c):
+    return model.sortDepBydate(lista_c)
+def sortDepbyprice(listac):
+    return model.sortDepbyCost(listac)
 
 # Funciones de consulta sobre el catálogo
 def artistsize(catalog):
@@ -87,4 +93,8 @@ def searchConstituentID (Lista_artista,idAw):
     return model.searchConstituentID (Lista_artista,idAw)
 def NumArtByNat(catalog):
     return model.NumArtByNat(catalog)
+def Calcular_Costo_dep (departamento,mapa):
+    pareja = mp.get(mapa,departamento)
+    valor = me.getValue(pareja)
+    return model.Calcular_Costo_dep (valor)
 

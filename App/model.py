@@ -45,7 +45,6 @@ los mismos.
 def newCatalog():
     catalogo = {'artist': None,
                'artworks': None,
-               'Artw_Nacionalidades': None,
                "medium": None,
                "nationality":None,
                "ID":None}
@@ -57,20 +56,12 @@ def newCatalog():
     catalogo["ID"] = mp.newMap(1000,maptype="CHAINING",loadfactor=0.36)
     catalogo["Begindates"] = mp.newMap(1000,maptype="PROBING",loadfactor=0.80)
     catalogo["DateAcquired"] = mp.newMap(1000,maptype="PROBING",loadfactor=0.80)
+    catalogo["departamento"] = mp.newMap(1000,maptype="CHAINING",loadfactor=0.80)
 
     return catalogo
 
 # Funciones para agregar informacion al catalogo
-def buscarArtworks(lista_artworks,id,lista):
-    tamañoArw = lt.size(lista_artworks)
-    i = 0
-    while i < tamañoArw:
-        elemento = lt.getElement(lista_artworks,i)
-        artwork = elemento["ConstituentID"]
-        C_id = artwork.strip("[]")
-        if id in C_id:
-            lt.addLast(lista,elemento)
-        i+=1   
+"----------- Agregar Artista -----------------------------"
 def addArtists(catalog, artist):
     lt.addLast(catalog['artist'], artist)
     # Datos  
@@ -81,35 +72,26 @@ def addArtists(catalog, artist):
     mapaBDates = catalog["Begindates"]
     mapaNat = catalog['nationality']
     mapaId = catalog["ID"]
-    artworks = catalog['artworks']
     #Agregar Mapas
     addBeginDates(begindate,mapaBDates,artist)
-    AddNatMap(nacionalidad, iD, mapaNat, artworks)
-    AddIdMap(iD,mapaId,artworks)
-  
-def AddIdMap(identificador,mapa,lista):
-    existId = mp.contains(mapa,identificador)
-    if existId == True:
-        Pareja = mp.get(mapa,identificador)
-        valor = me.getValue(Pareja)
-        buscarArtworks(lista,identificador,valor)
-    else:
-        lista_art = lt.newList(datastructure="ARRAY_LIST")
-        buscarArtworks(lista,identificador,lista_art)
-        mp.put(mapa,identificador,lista_art)
-    
-
-def AddNatMap(nacionalidad, iD, mapa, artworks):
-    existNat = mp.contains(mapa,nacionalidad)
-    if existNat == True:
-        Pareja = mp.get(mapa,nacionalidad)
-        valor = me.getValue(Pareja)
-        buscarArtworks(artworks,iD,valor)
-    else:
-        lista_art = lt.newList(datastructure="ARRAY_LIST")
-        buscarArtworks(artworks,iD,lista_art)
-        mp.put(mapa,nacionalidad,lista_art)
-"Mapa begindates"
+    AddNatMap(nacionalidad, iD, mapaNat, mapaId)
+"-------------- Mapa Artworks por nacionalidad-------------"
+def AddNatMap(nacionalidad, iD, mapa, mapaId):
+    entry = mp.get(mapaId,iD)
+    if entry != None:
+        ArtworksByart = me.getValue(entry)
+        existNat = mp.contains(mapa,nacionalidad)
+        if existNat == True:
+            Pareja = mp.get(mapa,nacionalidad)
+            valor = me.getValue(Pareja)
+            i = 0
+            while i < lt.size(ArtworksByart):
+                    elemento = lt.getElement(ArtworksByart,i)
+                    lt.addLast(valor,elemento)
+                    i += 1
+        else:
+            mp.put(mapa,nacionalidad,ArtworksByart)
+"------------Mapa begindates por artistas ---------------"
 def addBeginDates(begindate,mapa,artist):
     exitDate= mp.contains(mapa,begindate)
     if exitDate == True:
@@ -120,16 +102,28 @@ def addBeginDates(begindate,mapa,artist):
         lista_art= lt.newList(datastructure="ARRAY_LIST")
         lt.addLast(lista_art,artist)
         mp.put(mapa,begindate,lista_art)
+"-------------- Agregar artowrk-------------------------"
 def addArtworks(catalog, artwork):
     lt.addLast(catalog['artworks'], artwork)
     #Datos 
     Dateacquired = artwork["DateAcquired"]
+    departamento = artwork["Department"]
+    Id = artwork["ConstituentID"]
+    Id = Id.strip("[]")
+    Ids = Id.split(",")
     #Mapas
     DateAcMap = catalog["DateAcquired"]
+    DepaMap = catalog["departamento"]
+    mapaId = catalog["ID"]
     #Agregar a mapas
+    for Identificador in Ids:
+        if len(Ids) == 1:
+            artwork["Unique"] = True
+        AddIdMap(Identificador,mapaId,artwork)
     addDateAc(Dateacquired,DateAcMap,artwork)
+    addDep(departamento,DepaMap,artwork)
     mp.put(catalog["medium"], artwork["Medium"], artwork )
-"Mapa Date Acquired"
+"----------Mapa Date Acquired--------------------"
 def addDateAc(fecha,mapa,artwork):
     existDate = mp.contains(mapa,fecha)
     if existDate:
@@ -140,7 +134,28 @@ def addDateAc(fecha,mapa,artwork):
         lista = lt.newList(datastructure="ARRAY_LIST")
         lt.addLast(lista,artwork)
         mp.put(mapa,fecha,lista)
-
+"---------------Mapa departamento-----------------"
+def addDep(departamento,mapa,artwork):
+    existDep = mp.contains(mapa,departamento)
+    if existDep == True:
+        pareja = mp.get(mapa,departamento)
+        valor = me.getValue(pareja)
+        lt.addLast(valor,artwork)
+    else:
+        lista = lt.newList(datastructure="ARRAY_LIST")
+        lt.addLast(lista,artwork)
+        mp.put(mapa,departamento,lista)
+"--------------Mapa Artworks por Id -----------"
+def AddIdMap(identificador,mapa,artwork):
+    existId = mp.contains(mapa,identificador)
+    if existId == True:
+        Pareja = mp.get(mapa,identificador)
+        valor = me.getValue(Pareja)
+        lt.addLast(valor,artwork)
+    else:
+        lista_art = lt.newList(datastructure="ARRAY_LIST")
+        lt.addLast(lista_art,artwork)
+        mp.put(mapa,identificador,lista_art)
 
 # Funciones para creacion de datos
 
@@ -150,11 +165,18 @@ def ArtistSize(catalog):
 
 def ArtworksSize(catalog):
     return lt.size(catalog["artworks"])
-def getNumberNat(cont,nacionalidad):
-    mapa = cont["nationality"]
-    pareja = mp.get(mapa,nacionalidad)
-    total = me.getValue(pareja)
-    return lt.size(total)
+def searchConstituentID (Lista_artista,idAw):
+    size = lt.size(Lista_artista)
+    i = 1 
+    id_a_comparar = idAw.strip("[]")
+    while i < size:
+        elemento = lt.getElement(Lista_artista,i)
+        C_id = elemento["ConstituentID"]
+        if C_id in id_a_comparar:
+            return elemento["DisplayName"]
+
+        i+= 1
+
 "-------------------------Requerimiento 1---------------"
 def getartistsByrange(catalog,InitialDate,FinalDate):
     lista = lt.newList(datastructure="ARRAY_LIST")
@@ -212,17 +234,7 @@ def Artorksinrange(catalog,date1,date2):
                 
         i +=1
     return lista,Numpurchase
-def searchConstituentID (Lista_artista,idAw):
-    size = lt.size(Lista_artista)
-    i = 1 
-    id_a_comparar = idAw.strip("[]")
-    while i < size:
-        elemento = lt.getElement(Lista_artista,i)
-        C_id = elemento["ConstituentID"]
-        if C_id in id_a_comparar:
-            return elemento["DisplayName"]
 
-        i+= 1
 "-----------Requerimiento 4 -------------"
 def NumArtByNat(catalog):
     lista = lt.newList(datastructure="ARRAY_LIST")
@@ -238,6 +250,68 @@ def NumArtByNat(catalog):
         lt.addLast(lista,catalogo)
         i += 1
     return lista
+"--------------------Requerimiento 5-----------------"
+def Calcular_Costo_dep (Lista_departamentos):
+    Lista_con_costos = lt.newList(datastructure= "ARRAY_LIST")
+    size = lt.size(Lista_departamentos)
+    i = 1
+    costo_total = 0
+    peso_total = 0.0
+    while i <= size:
+        costo = 0
+        elemento = lt.getElement(Lista_departamentos,i)
+        peso = elemento["Weight (kg)"] 
+        largo= elemento["Length (cm)"] 
+        ancho = elemento["Width (cm)"] 
+        alto = elemento["Height (cm)"] 
+        if peso != "":
+            costo = float(peso)*72.00
+            elemento["CostoTransporte (USD)"] = costo
+            lt.addLast(Lista_con_costos,elemento)
+            costo_total += costo
+            peso_total += float(peso)
+        elif largo != "" and ancho !="" and alto != "":
+            largo = float(largo) / 100
+            alto = float(alto) / 100
+            ancho = float(ancho) / 100
+            costo = (largo * ancho * alto) * 72.00
+            elemento["CostoTransporte (USD)"] = costo
+            lt.addLast(Lista_con_costos,elemento)
+            costo_total += costo
+            peso_total += 0.0
+        elif largo != "" and ancho !="":
+            largo = float(largo) / 100
+            ancho = float(ancho) / 100
+            costo = (largo * ancho) * 72.00
+            elemento["CostoTransporte (USD)"] = costo
+            lt.addLast(Lista_con_costos,elemento)
+            costo_total += costo
+            peso_total += 0.0
+        elif largo != "" and alto !="":
+            alto = float(alto) / 100
+            largo = float(largo) / 100
+            costo = (largo * alto) * 72.00
+            elemento["CostoTransporte (USD)"] = costo
+            lt.addLast(Lista_con_costos,elemento)
+            costo_total += costo
+            peso_total += 0.0
+        elif alto != "" and ancho !="":
+            alto = float(alto) / 100
+            ancho = float(ancho) / 100
+            costo = round((alto * ancho) * 72.00, 2)
+            elemento["CostoTransporte (USD)"] = costo
+            lt.addLast(Lista_con_costos,elemento)
+            costo_total += costo
+            peso_total += 0.0        
+        else:
+            costo = 42.00
+            elemento["CostoTransporte (USD)"] = costo
+            lt.addLast(Lista_con_costos,elemento)
+            costo_total += costo
+            peso_total += 0.0
+        i+=1
+    return Lista_con_costos, round(costo_total,2), round(peso_total,2)
+
 
 
 # Funciones utilizadas para comparar elementos dentro de una lista
@@ -251,17 +325,28 @@ def cmpArtistByBirthDate(artist1, artist2):
 def cmpArtworkByDateAcquired(artwork1, artwork2):
     date1= artwork1["DateAcquired"]
     date2= artwork2["DateAcquired"]
-    if date1 != "" and date2 != "":
-        fecha1 = time.strptime(date1, "%Y-%m-%d")
-        fecha2 = time.strptime(date2, "%Y-%m-%d")
-        comparacion = fecha1 < fecha2
-        return comparacion
-    else:
-        return True
+    fecha1 = time.strptime(date1, "%Y-%m-%d")
+    fecha2 = time.strptime(date2, "%Y-%m-%d")
+    comparacion = fecha1 < fecha2
+    return comparacion
 def cmpArtVsNatByNumber(num1,num2):
     Numero1=num1["Artworks"]
     Numero2=num2["Artworks"]
     if Numero1 > Numero2:
+        return True
+    else:
+        return False
+def cmpDepByDate(artwork1, artwork2):
+    date1= artwork1["Date"]
+    date2= artwork2["Date"]
+    if date1 < date2:
+        return True
+    else:
+        return False    
+def cmpDepByprice(obra1,obra2):
+    costo_ob1 = obra1["CostoTransporte (USD)"]
+    costo_ob2 = obra2["CostoTransporte (USD)"]
+    if costo_ob1 > costo_ob2:
         return True
     else:
         return False
@@ -281,5 +366,15 @@ def sortArtVsNatBynum (catalog):
     sub_list2 = lt.subList(catalog,1, lt.size(catalog))
     sub_list2 = sub_list2.copy()
     sorted_list = Mg.sort(sub_list2, cmpArtVsNatByNumber)
+    return sorted_list
+def sortDepBydate (lista_Costo):
+    sub_list2 = lt.subList(lista_Costo,1, lt.size(lista_Costo))
+    sub_list2 = sub_list2.copy()
+    sorted_list = Mg.sort(sub_list2, cmpDepByDate)
+    return sorted_list
+def sortDepbyCost(lista_costo):
+    sub_list2 = lt.subList(lista_costo,1, lt.size(lista_costo))
+    sub_list2 = sub_list2.copy()
+    sorted_list = Mg.sort(sub_list2, cmpDepByprice)
     return sorted_list
 
