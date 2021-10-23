@@ -73,6 +73,8 @@ def sortDepabydate(lista_c):
     return model.sortDepBydate(lista_c)
 def sortDepbyprice(listac):
     return model.sortDepbyCost(listac)
+def sortByMediumsQuantity(catalog):
+    return model.sortByMediumsSize(catalog)
 
 # Funciones de consulta sobre el catálogo
 def artistsize(catalog):
@@ -97,4 +99,8 @@ def Calcular_Costo_dep (departamento,mapa):
     pareja = mp.get(mapa,departamento)
     valor = me.getValue(pareja)
     return model.Calcular_Costo_dep (valor)
+def searchConstituentIDByName (Lista_artista,name):
+    return model.searchConstituentIDByName (Lista_artista,name)
+def listaRepeticionesMediums(catalog):
+    return model.listaRepeticionesMediums(catalog)
 

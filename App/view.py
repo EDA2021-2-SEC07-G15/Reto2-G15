@@ -64,6 +64,28 @@ def printSortResults2(ord_artworks,lista_artistas):
         nombreU = controller.searchConstituentID(lista_artistas,C_idu)
         print("Titulo: " + ultimos["Title"] + "; Nombre: " + nombreU + "; Fecha: " + ultimos["Date"] + "; Medio: " + ultimos["Medium"] + "; Dimensiones: " + ultimos["Dimensions"])
         j -=1
+def printResults3 (name,ord_mediums, mapMediums, cantidadObras):
+    print("El artista " + name + " tiene " + str(cantidadObras) + " obras. ") 
+    cantidadMedios = lt.size(mp.keySet(mapMediums))
+    print( "La cantidad de técnicas (medios) utlizadas es : " + str(cantidadMedios) )
+    tecnicaMasUtilizada = me.getKey(lt.getElement(ord_mediums, 1))
+    print( "El nombre de la técnica más utilizada es: " + tecnicaMasUtilizada)
+    print( "El top 5 de técnicas más utilizadas de " + name + " es: ")
+    i=1
+    while (i<6):
+        elemento = lt.getElement(ord_mediums, i)
+        llave = me.getKey(elemento)
+        valor = me.getValue(elemento)
+        print (llave + " : " + str(valor))
+        i+=1
+    print ("Una muestra de 3 " + str(tecnicaMasUtilizada) + " es: " )
+    entry = mp.get(mapMediums, tecnicaMasUtilizada)
+    obras = me.getValue(entry)
+    j=1
+    while (j<4):
+        elemento = lt.getElement(obras, j)
+        print ( "Title: " + elemento["Title"] + "Medium: " + elemento["Medium"]+ "Date: " +  elemento["Date"] + "Dimensions: " + elemento["Dimensions"])
+        j+=1
 def PrintResults4(lista,mapa,lista_artistas):
     print( "El top 10 paises en MoMA son :")
     i = 1
@@ -173,39 +195,69 @@ while True:
         print("Inicializando catálogo ....")
         cont = controller.initCatalog()
         print("Cargando información de los archivos ....")
-        controller.loadData(cont,'Artists-utf8-large.csv','Artworks-utf8-large.csv')
+        start_time = time.process_time()
+        controller.loadData(cont,'Artists-utf8-50pct.csv','Artworks-utf8-50pct.csv')
         print("Se cargo exitosamente la información")
         print("Artistas cargados: " + str(controller.artistsize(cont)))
         print("Artworks cargados: " + str(controller.artworkssize(cont)))
+        stop_time = time.process_time()
+        elapsed_time_mseg = (stop_time - start_time)
+        print("El tiempo es: " + str(elapsed_time_mseg)) 
     elif int(inputs[0]) == 2:
         fechaInicial = int(input("Digite el año inicial (YYYY): "))
         fechaFinal = int(input("Digite el año final (YYYY): "))
+        start_time = time.process_time()
         total = controller.getartistsByrange (cont,fechaInicial,fechaFinal)
         print("Hay " + str(lt.size(total)) + " artistas entre " + str(fechaInicial) + " y " + str(fechaFinal))
         ordenada = controller.sortArtistByDate(total)
         printSortResults1(ordenada)
+        stop_time = time.process_time()
+        elapsed_time_mseg = (stop_time - start_time)
+        print("El tiempo es: " + str(elapsed_time_mseg))  
+
     elif int(inputs[0]) == 3:
         date1 = input("Indique el año inicial de la búsqueda en formato AAAA-MM-DD: ")
         date2 = input("Indique el año final de la búsqueda en formato AAAA-MM-DD: ")
+        start_time = time.process_time()
         total = controller.Artorksinrange(cont,date1,date2)
         print("Hay " + str(lt.size(total[0])) + " adquisiciones hechas entre " + str(date1) + " y " + str(date2))
         print("El MoMA adquirió " + str(total[1]) + " piezas unicas entre " + str(date1) + " y " + str(date2) )
         ordenada = controller.sortDate(total[0])
         printSortResults2(ordenada,cont["artist"])
+        stop_time = time.process_time()
+        elapsed_time_mseg = (stop_time - start_time)
+        print("El tiempo es: " + str(elapsed_time_mseg))  
     elif int(inputs[0]) == 4:
-        pass
+        nombreArtista = input("Ingrese el nombre del artista: ")
+        start_time = time.process_time()
+        resultado1 = controller.searchConstituentIDByName(cont, nombreArtista)
+        resultado2 = controller.listaRepeticionesMediums(resultado1[0])
+        resultado3 = controller.sortByMediumsQuantity(resultado2)
+        printResults3 (nombreArtista,resultado3, resultado1[0], resultado1[1])
+        stop_time = time.process_time()
+        elapsed_time_mseg = (stop_time - start_time)
+        print("El tiempo es: " + str(elapsed_time_mseg)) 
+
     elif int(inputs[0]) == 5:
+        start_time = time.process_time()
         Catalogo_Art_Nacionalidad = controller.NumArtByNat(cont)
         ordenada = controller.sortArtVsNatBynum(Catalogo_Art_Nacionalidad)
         mapa = cont["nationality"]
         PrintResults4(ordenada,mapa,cont["artist"])
+        stop_time = time.process_time()
+        elapsed_time_mseg = (stop_time - start_time)
+        print("El tiempo es: " + str(elapsed_time_mseg)) 
     elif int(inputs[0])== 6:
         departamento = input("Ingrese el departamento que desea consultar: ")
+        start_time = time.process_time()
         mapa = cont["departamento"]
         Lista_costos = controller.Calcular_Costo_dep (departamento,mapa)
         ordenada_fechas = controller.sortDepabydate(Lista_costos[0])
         ordenada_costos = controller.sortDepbyprice(Lista_costos[0])
         printResults6(mapa,departamento,Lista_costos[1],ordenada_costos,ordenada_fechas,Lista_costos[2],cont["artist"])
+        stop_time = time.process_time()
+        elapsed_time_mseg = (stop_time - start_time)
+        print("El tiempo es: " + str(elapsed_time_mseg)) 
     else:
         sys.exit(0)
 sys.exit(0)

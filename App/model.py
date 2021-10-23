@@ -57,7 +57,7 @@ def newCatalog():
     catalogo["Begindates"] = mp.newMap(1000,maptype="PROBING",loadfactor=0.80)
     catalogo["DateAcquired"] = mp.newMap(1000,maptype="PROBING",loadfactor=0.80)
     catalogo["departamento"] = mp.newMap(1000,maptype="CHAINING",loadfactor=0.80)
-
+    catalogo["DisplayName"] = mp.newMap(1000,maptype="CHAINING",loadfactor=0.36)
     return catalogo
 
 # Funciones para agregar informacion al catalogo
@@ -68,13 +68,16 @@ def addArtists(catalog, artist):
     nacionalidad = artist['Nationality']
     iD = artist['ConstituentID']
     begindate = artist["BeginDate"]
+    name = artist["DisplayName"]
     #Mapas
     mapaBDates = catalog["Begindates"]
     mapaNat = catalog['nationality']
     mapaId = catalog["ID"]
+    mapaDisplayName = catalog["DisplayName"]
     #Agregar Mapas
     addBeginDates(begindate,mapaBDates,artist)
     AddNatMap(nacionalidad, iD, mapaNat, mapaId)
+    addArtistByName(name, mapaId, mapaDisplayName, iD)
 "-------------- Mapa Artworks por nacionalidad-------------"
 def AddNatMap(nacionalidad, iD, mapa, mapaId):
     entry = mp.get(mapaId,iD)
@@ -102,6 +105,12 @@ def addBeginDates(begindate,mapa,artist):
         lista_art= lt.newList(datastructure="ARRAY_LIST")
         lt.addLast(lista_art,artist)
         mp.put(mapa,begindate,lista_art)
+"------------------Mapa Artist By name---------------------"
+def addArtistByName(name,mapaId,mapaArtistByName,id):
+    entry = mp.get(mapaId, id)
+    if entry != None:
+        artworksByArtist = me.getValue(entry)
+        mp.put(mapaArtistByName,name,artworksByArtist)
 "-------------- Agregar artowrk-------------------------"
 def addArtworks(catalog, artwork):
     lt.addLast(catalog['artworks'], artwork)
@@ -122,7 +131,6 @@ def addArtworks(catalog, artwork):
         AddIdMap(Identificador,mapaId,artwork)
     addDateAc(Dateacquired,DateAcMap,artwork)
     addDep(departamento,DepaMap,artwork)
-    mp.put(catalog["medium"], artwork["Medium"], artwork )
 "----------Mapa Date Acquired--------------------"
 def addDateAc(fecha,mapa,artwork):
     existDate = mp.contains(mapa,fecha)
@@ -234,6 +242,43 @@ def Artorksinrange(catalog,date1,date2):
                 
         i +=1
     return lista,Numpurchase
+"------------Requerimiento 3-----------------------"
+def searchConstituentIDByName (catalogo, name):
+    map = catalogo["DisplayName"]
+    entry = mp.get(map, name)
+    mediumsMap = mp.newMap(1000,maptype="CHAINING",loadfactor=0.80)
+    cantidadObras = 0
+    if entry != None:
+        artistArtworks = me.getValue(entry)
+        cantidadObras += lt.size (artistArtworks)
+        i= 1
+        while i<lt.size(artistArtworks):
+            obra = lt.getElement(artistArtworks, i)
+            medio = obra["Medium"]
+            existMedium = mp.contains(mediumsMap, medio)
+            if existMedium :
+                pareja = mp.get(mediumsMap,medio)
+                valor = me.getValue(pareja)
+                lt.addLast(valor, obra)
+            else:
+                listMediums = lt.newList( datastructure="ARRAY_LIST")
+                lt.addLast(listMediums, obra)
+                mp.put(mediumsMap, medio, listMediums)
+            i += 1           
+    return mediumsMap, cantidadObras
+def listaRepeticionesMediums (mapMediums):
+    listaRepeticionesMediums = lt.newList(datastructure="ARRAY_LIST")
+    llaves = mp.keySet(mapMediums)
+    i = 1
+    while i < lt.size(llaves):
+        medio = lt.getElement (llaves, i )
+        pareja = mp.get(mapMediums,medio)
+        valor = me.getValue(pareja)
+        cantidadObras = lt.size(valor)
+        entry  = me.newMapEntry(medio, cantidadObras)
+        lt.addLast(listaRepeticionesMediums, entry)
+        i+=1  
+    return listaRepeticionesMediums 
 
 "-----------Requerimiento 4 -------------"
 def NumArtByNat(catalog):
@@ -350,6 +395,13 @@ def cmpDepByprice(obra1,obra2):
         return True
     else:
         return False
+def cmpMediumsQuantity(medium1 , medium2):
+    medio1 = me.getValue(medium1)
+    medio2 = me.getValue(medium2) 
+    if medio1 > medio2:
+        return True
+    else:
+        return False
 
 # Funciones de ordenamiento
 def sortArtistbyDate (lista):
@@ -376,5 +428,10 @@ def sortDepbyCost(lista_costo):
     sub_list2 = lt.subList(lista_costo,1, lt.size(lista_costo))
     sub_list2 = sub_list2.copy()
     sorted_list = Mg.sort(sub_list2, cmpDepByprice)
+    return sorted_list
+def sortByMediumsSize(mediumsList):
+    sub_list2 = lt.subList(mediumsList,1, lt.size(mediumsList))
+    sub_list2 = sub_list2.copy()
+    sorted_list = Mg.sort(sub_list2, cmpMediumsQuantity)
     return sorted_list
 
